@@ -1,0 +1,86 @@
+clear
+clc
+
+//INPUTS
+
+r_max=10
+L=input('enter the value of l:')
+Z=1
+pqn=input('enter the value of n(n>l):')
+num=1301
+
+
+//CONSTANTS
+//c=speed of light
+
+hbar=1973
+e=3.795
+me=0.511e6
+
+//POTENTIAL WELL
+//potential energy in electon volts(eV)
+
+
+r_min=1e-5
+r=linspace(r_min,r_max,num)
+dr=r(2)-r(1)
+dr2=dr^2
+
+//couloumb term
+K=-Z*e*e
+U_c=K./r
+//angular momentum term
+U_L=(hbar^2*L*(L+1)/(2*me))./r.^2
+
+
+//Effective potential energy
+U=U_c+U_L
+for cn=1:(num-2)
+    U_matrix(cn,cn)=U(cn+1)
+end
+
+
+//solve schrodiger equations
+//Make second derivative matrix
+
+off=ones(num-3,1)
+SD_matrix=(-2*eye(num-2,num-2)+diag(off,1)+diag(off,-1))/dr2
+//Make KE Matrix
+K_matrix=-hbar^2/(2*me)*SD_matrix
+
+H_matrix=K_matrix+U_matrix
+//Find Eigenvalues E_n and Eigenfunction psi_N
+[e_funct,e_values]=spec(H_matrix)
+//All Eigenvalues 1,2,...n where E_N<0
+//DISPLAYING ReSULTS(Eigenvalues)
+En=diag(e_values)
+En=(En(En<0))'
+
+disp('Quantum state, Energy Eigenvalues(in eV):')
+for i=1:length(En)
+printf('%i %f\n',i,En(i))
+end
+nl=pqn-L
+printf('Energy Eigenvalue(in eV) for Quntum stae no.%i:(l=%i)\n%f',nl,L,En(nl))
+//Normalisation of eigenfunctions
+for n=1:nl
+    psi(:,n)=[0;e_funct(:,n);0]
+    area=inttrap(r,(psi(:,n).*psi(:,n))')
+    psi(:,n)=psi(:,n)/sqrt(area)
+    prob(:,n)=psi(:,n).*psi(:,n)
+end
+//PLOTTING RESULTS(Eigenfunctions and probability)
+
+figure(1)
+xtitle('probability density vs radius')
+xlabel('radius in armstrong')
+ylabel('Probabilty Density per meter')
+xgrid
+plot(r',prob(:,nl),'b')
+
+figure(2)
+xtitle('wave function vs radius')
+xlabel('radius in armstrong')
+ylabel('wave function')
+xgrid
+plot(r',psi(:,nl),'b')
