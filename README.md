@@ -1,2 +1,2 @@
-# Contents_Scilab_Demo
+# Contents_Scilab_Example
 Scilab Contents
